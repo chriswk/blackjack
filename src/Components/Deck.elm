@@ -139,11 +139,8 @@ newDeck =
 
         actualSuits =
             List.map (withDefault Clubs) suits
-
-        deck =
-            List.concatMap rankForSuit actualSuits
     in
-        Debug.log "Deck: " deck
+        List.concatMap rankForSuit actualSuits
 
 
 valueOfCard : Card -> Int

@@ -1,5 +1,5 @@
-import './styles/cards.scss'
-import './styles/style.scss'
+import './styles/cards.css'
+import './styles/style.css'
 import { Main } from './Main.elm';
 import registerServiceWorker from './registerServiceWorker';
 

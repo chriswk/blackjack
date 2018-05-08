@@ -2,10 +2,10 @@ module Main exposing (..)
 
 import Html exposing (Html, text, div, h1, img)
 import Html.Attributes exposing (src, class)
-import Random exposing (initialSeed)
+import Random
 import Components.Blackjack exposing (..)
 import Task exposing (Task)
-import Components.Deck exposing (shuffleDeck)
+import Components.Deck exposing (shuffleDeck, newDeck)
 
 
 ---- MODEL ----
@@ -13,14 +13,14 @@ import Components.Deck exposing (shuffleDeck)
 
 initialModel : Model
 initialModel =
-    { deck = []
+    { deck = newDeck
     , playerWins = 0
     , dealerWins = 0
     , dealerHitLimit = 17
     , draws = 0
     , gamesPlayed = 0
-    , player = Player []
-    , dealer = Player []
+    , player = Player [] Playing
+    , dealer = Player [] Playing
     , gameStatus = Waiting
     }
 
@@ -55,6 +55,13 @@ update msg model =
             in
                 ( model, Random.generate NewDeck generator )
 
+        StartPlaying ->
+            let
+                model_ =
+                    initialDeal model
+            in
+                ( { model_ | gameStatus = PlayerDrawing }, Cmd.none )
+
         Hit ->
             ( hit model, send CheckGame )
 
@@ -62,10 +69,10 @@ update msg model =
             ( playDealer model, send CheckGame )
 
         NewDeck d ->
-            ( { model | deck = d }, Cmd.none )
+            ( { model | deck = d }, send StartPlaying )
 
         CheckGame ->
-            ( checkStatus model, Cmd.none )
+            ( Debug.log "Checking state" checkStatus model, Cmd.none )
 
 
 
@@ -90,7 +97,6 @@ view model =
             , div [ class "unit" ] [ text playerS ]
             , div [ class "unit" ] [ text dealerS ]
             , div [ class "unit" ] [ text gameState ]
-            , div [ class "unit" ] [ text (toString model) ]
             ]
 
 

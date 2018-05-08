@@ -12,6 +12,7 @@ type alias Hand =
 
 type Msg
     = NewGame
+    | StartPlaying
     | Hit
     | Stand
     | NewDeck Deck
@@ -35,7 +36,9 @@ type PlayerStatus
 
 
 type alias Player =
-    { hand : List Card }
+    { hand : List Card
+    , status : PlayerStatus
+    }
 
 
 type alias Model =
@@ -115,7 +118,10 @@ dealerHtml model =
         cards =
             cardsHtml model.dealer.hand
     in
-        div [ class "line dealer" ] cards
+        div [ class "line dealer" ]
+            [ div [ class "cards" ] cards
+            , score model.dealer
+            ]
 
 
 playerHtml : Model -> Html Msg
@@ -127,8 +133,14 @@ playerHtml model =
         div [ class "line player" ]
             [ div [ class "cards" ]
                 cards
+            , score model.player
             , gameButtons model
             ]
+
+
+score : Player -> Html Msg
+score p =
+    text <| toString <| scoreHand p.hand
 
 
 gameButtons : Model -> Html Msg
@@ -405,10 +417,10 @@ checkStatus model =
 
 
 playerStatus : Player -> PlayerStatus
-playerStatus p =
-    if isBlackjack p.hand then
+playerStatus player =
+    if isBlackjack player.hand then
         Blackjack
-    else if isBust p.hand then
+    else if isBust player.hand then
         Bust
     else
-        Playing
+        player.status
