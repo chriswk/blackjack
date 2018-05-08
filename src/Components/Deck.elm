@@ -1,8 +1,8 @@
 module Components.Deck exposing (..)
 
 import Maybe exposing (..)
-import Random exposing (Generator, Seed)
-import Array exposing (Array, toList, fromList)
+import Random exposing (Generator)
+import Random.List exposing (shuffle)
 
 
 type Suit
@@ -180,65 +180,6 @@ valueOfCard { suit, rank } =
             10
 
 
-constant : a -> Generator a
-constant value =
-    Random.map (\_ -> value) Random.bool
-
-
-choose : Array a -> Generator ( Maybe a, Array a )
-choose arr =
-    if Array.isEmpty arr then
-        constant ( Nothing, arr )
-    else
-        let
-            lastIndex =
-                Array.length arr - 1
-
-            front i =
-                Array.slice 0 i arr
-
-            back i =
-                if i == lastIndex then
-                    Array.empty
-                else
-                    Array.slice (i + 1) (lastIndex + 1) arr
-
-            gen =
-                Random.int 0 lastIndex
-        in
-            Random.map
-                (\index ->
-                    ( Array.get index arr, Array.append (front index) (back index) )
-                )
-                gen
-
-
 shuffleDeck : Deck -> Generator Deck
 shuffleDeck deck =
-    let
-        arrDeck =
-            fromList deck
-    in
-        shuffle arrDeck
-            |> Random.map toList
-
-
-shuffle : Array a -> Generator (Array a)
-shuffle arr =
-    if Array.isEmpty arr then
-        constant arr
-    else
-        let
-            helper ( done, remaining ) =
-                choose remaining
-                    |> Random.andThen
-                        (\( m_val, shorter ) ->
-                            case m_val of
-                                Nothing ->
-                                    constant ( done, shorter )
-
-                                Just val ->
-                                    helper ( val :: done, shorter )
-                        )
-        in
-            Random.map (Tuple.first >> Array.fromList) (helper ( [], arr ))
+    shuffle deck
